@@ -1,0 +1,6 @@
+Graph/.vscode/*
+Graph/Graph
+Graph/*.o
+Graph/Makefile
+Graph/.qmake.stash
+Graph/Graph.pro.user
