@@ -1,8 +1,9 @@
 #include "grafo.h"
+#include "dados.h"
 #include <iostream>
 
 vector<Pessoa> nodes;
-vector<vector<Pessoa*>> edges;
+vector<vector<unsigned int>> edges;
 
 const int MAX = 10000000;
 
@@ -25,7 +26,7 @@ bool BFS(const unsigned int src, const unsigned int dest, vector<int> &pred, vec
         unsigned int u = queue.front();
         queue.pop();
         for (unsigned long i = edges[u].size(); i--; ) {
-            unsigned int valor = edges[u][i]->get_id();
+            unsigned int valor = edges[u][i];
             if(visited[valor] == false) {
                 visited[valor] = true;
                 dist[valor] = dist[u] + 1;
@@ -61,7 +62,7 @@ vector<int> BFS_Shortest_Distance(const unsigned int s, const unsigned int dest)
     return path;
 }
 
-void complete_BFS(const unsigned int src, vector<int>& pred, vector<int>& dist) {
+void complete_BFS(const unsigned int src, vector<int>& dist) {
     unsigned long v = nodes.size();
     queue<unsigned int> queue;
     bitset<MAX> visited;
@@ -69,7 +70,6 @@ void complete_BFS(const unsigned int src, vector<int>& pred, vector<int>& dist) 
     for (unsigned long i = v; i--; ) {
         visited[i] = false;
         dist[i] = 999999999;
-        pred[i] = -1;
     }
 
     visited[src] = true;
@@ -80,11 +80,10 @@ void complete_BFS(const unsigned int src, vector<int>& pred, vector<int>& dist) 
         unsigned int u = queue.front();
         queue.pop();
         for (unsigned long i = edges[u].size(); i--; ) {
-            unsigned int valor = edges[u][i]->get_id();
+            unsigned int valor = edges[u][i];
             if(visited[valor] == false) {
                 visited[valor] = true;
                 dist[valor] = dist[u] + 1;
-                pred[valor] = u;
                 queue.push(valor);
             }
         }
@@ -95,7 +94,7 @@ vector<int> complete_BFS_Shortest_Distance(const unsigned int s) {
     unsigned long v = nodes.size();
     vector<int> pred(v), dist(v);
 
-    complete_BFS(s, pred, dist);
+    complete_BFS(s, dist);
 
     vector<int> quantidade(1000, 0);
 
@@ -113,4 +112,39 @@ vector<int> complete_BFS_Shortest_Distance(const unsigned int s) {
     }
 
     return quantidade;
+}
+
+map<string, int> BFS_cidades() {
+    map<string, int> m;
+    int src = 0;
+    unsigned long v = nodes.size();
+    vector<int> dist(v);
+    queue<unsigned int> queue;
+    bitset<MAX> visited;
+
+    for (unsigned long i = v; i--; ) {
+        visited[i] = false;
+        dist[i] = 999999999;
+    }
+
+    visited[src] = true;
+    dist[src] = 0;
+    queue.push(src);
+
+    while (!queue.empty()) {
+        unsigned int u = queue.front();
+        queue.pop();
+        for (unsigned long i = edges[u].size(); i--; ) {
+            unsigned int valor = edges[u][i];
+            if(visited[valor] == false) {
+                visited[valor] = true;
+                dist[valor] = dist[u] + 1;
+                queue.push(valor);
+                string s(nodes[valor].get_cidade());
+                m[s]++;
+            }
+        }
+    }
+
+    return m;
 }

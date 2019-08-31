@@ -28,17 +28,15 @@ private slots:
     void tela_graf_aleat();
     void tela_add_relac();
     void tela_bfs_sp();
-    void tela_dfs_sp();
     void tela_bfs_con();
-    void tela_dfs_con();
+    void tela_extra_inf();
+    void tela_estatistica();
     void adicionar_pessoa();
     void perfil_individual();
     void grafo_aleatorio();
     void adicionar_relacionamento();
     void bfs_sp();
-    void dfs_sp();
     void bfs_connection();
-    void dfs_connection();
 };
 
 #endif // WINDOW_H

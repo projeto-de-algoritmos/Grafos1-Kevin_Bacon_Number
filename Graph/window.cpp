@@ -80,25 +80,27 @@ window::window(QWidget *parent) : QWidget(parent) {
     connect(connection_bfs, &QPushButton::clicked, this, &window::tela_bfs_con);
     complexos->addWidget(connection_bfs, 2, 0);
 
-    /**************** DFS *********************/
+    /**************** OUTROS *********************/
 
-    QLabel *dfs = new QLabel("DFS", this);
-    complexos->addWidget(dfs, 0, 1);
-    dfs->setAlignment(Qt::AlignCenter);
-    dfs->setMaximumHeight(maximum_label_height);
-    dfs->setFont(labelFont);
+    QLabel *outros = new QLabel("OUTROS", this);
+    complexos->addWidget(outros, 0, 1);
+    outros->setAlignment(Qt::AlignCenter);
+    outros->setMaximumHeight(maximum_label_height);
+    outros->setFont(labelFont);
 
-    QPushButton *shortest_dfs = new QPushButton(" ??? ", this);
-    shortest_dfs->setFixedWidth(button_size);
-    shortest_dfs->setFont(buttonFont);
-    connect(shortest_dfs, &QPushButton::clicked, this, &window::tela_dfs_sp);
-    complexos->addWidget(shortest_dfs, 1, 1);
+    QPushButton *extra_inf = new QPushButton("Informações sobre o grafo", this);
+    extra_inf->setFixedWidth(button_size);
+    extra_inf->setFont(buttonFont);
+    connect(extra_inf, &QPushButton::clicked, this, &window::tela_extra_inf);
+    complexos->addWidget(extra_inf, 1, 1);
 
-    QPushButton *connection_dfs = new QPushButton(" ??? ", this);
-    connection_dfs->setFixedWidth(button_size);
-    connection_dfs->setFont(buttonFont);
-    connect(connection_dfs, &QPushButton::clicked, this, &window::tela_dfs_con);
-    complexos->addWidget(connection_dfs, 2, 1);
+    QPushButton *estatisticas = new QPushButton("Estatisticas", this);
+    estatisticas->setFixedWidth(button_size);
+    estatisticas->setFont(buttonFont);
+    connect(estatisticas, &QPushButton::clicked, this, &window::tela_estatistica);
+    complexos->addWidget(estatisticas, 2, 1);
+
+
 
     /********************** FINALIZAÇÕES *********************/
 
@@ -394,10 +396,6 @@ void window::tela_bfs_sp() {
     loop.exec();
 }
 
-void window::tela_dfs_sp() {
-
-}
-
 void window::tela_bfs_con() {
     new_window = new QWidget(nullptr);
 
@@ -453,10 +451,6 @@ void window::tela_bfs_con() {
     QEventLoop loop;
     connect(this, SIGNAL(destroyed()), & loop, SLOT(quit()));
     loop.exec();
-}
-
-void window::tela_dfs_con() {
-
 }
 
 void window::adicionar_pessoa() {
@@ -607,17 +601,16 @@ void window::grafo_aleatorio() {
                 repetido = false;
                 x = dist_edges(mt);
                 y = dist_edges(mt);
-                for(auto it = edges[x].cbegin(); it != edges[x].cend(); ++it) {
-                    Pessoa *p = *it;
-                    if(p->get_id() == y) {
+                for (const auto& it : edges[x]) {
+                    if(it == y) {
                         repetido = true;
                         break;
                     }
                 }
             } while(repetido);
 
-            edges[x].push_back(&nodes[y]);
-            edges[y].push_back(&nodes[x]);
+            edges[x].push_back(y);
+            edges[y].push_back(x);
             if(!(i%um_perc)) progressBar->setValue(i);
         }
     }
@@ -625,8 +618,8 @@ void window::grafo_aleatorio() {
         int i = 0;
         for(int x = n_nodes; x--; )
             for(int y = n_nodes; y--; ) {
-                edges[x].push_back(&nodes[y]);
-                edges[y].push_back(&nodes[x]);
+                edges[x].push_back(y);
+                edges[y].push_back(x);
                 i++;
                 if(!(i%um_perc)) progressBar->setValue(i);
             }
@@ -653,16 +646,16 @@ void window::adicionar_relacionamento() {
         return;
     }
 
-    for(auto it = edges[p1].cbegin(); it != edges[p1].cend(); ++it) {
-        Pessoa *p = *it;
-        if(p->get_id() == p2) {
+    for (const auto& it : edges[p1]) {
+        const Pessoa p = nodes[it];
+        if(p.get_id() == p2) {
             alert->setText("Essas pessoas já se conhecem");
             return;
         }
     }
 
-    edges[p1].push_back(&nodes[p2]);
-    edges[p2].push_back(&nodes[p1]);
+    edges[p1].push_back(p2);
+    edges[p2].push_back(p1);
 
     new_window->close();
 }
@@ -726,10 +719,6 @@ void window::bfs_sp() {
     loop.exec();
 }
 
-void window::dfs_sp() {
-
-}
-
 void window::bfs_connection() {
     unsigned int id = campo_texto1->text().toUInt();
     if(id >= nodes.size()) {
@@ -773,6 +762,81 @@ void window::bfs_connection() {
     loop.exec();
 }
 
-void window::dfs_connection() {
+void window::tela_extra_inf() {
+    // Número de Nós
+    // Número de arestas
+    // Bipartido  --  https://www.geeksforgeeks.org/bipartite-graph/  --
+    // Componentes conectados  --  https://www.geeksforgeeks.org/program-to-count-number-of-connected-components-in-an-undirected-graph/  --
+}
 
+void window::tela_estatistica() {
+    QFont font("Times", 15, QFont::Bold);
+    new_window = new QWidget(nullptr);
+    QVBoxLayout *tela = new QVBoxLayout();
+
+    QListWidget *lista = new QListWidget();
+    lista->setFont(font);
+
+    map<string, int> m = BFS_cidades();
+
+    for(auto c : m)
+        lista->addItem(QString::fromStdString("Número de moradores de " +
+                                              c.first + ": " + to_string(c.second)));
+
+    lista->addItem("");
+
+    int media = 0;
+    for(unsigned int i = 0; i < edges.size(); ++i) {
+        media += edges[i].size();
+    }
+
+    int quant_edges = media;
+    media /= edges.size();
+    media /= 2;
+
+    lista->addItem(QString::fromStdString("Número médio de amigos por pessoa: " + to_string(media)));
+    lista->addItem("");
+
+    unsigned int memoria_pessoas = sizeof(nodes[0])*nodes.size();
+    unsigned int memoria_edges = sizeof(edges[0][0])*quant_edges;
+    unsigned int memoria_total = memoria_pessoas + memoria_edges;
+
+    vector<string> medidas = {"Bytes", "KB", "MB", "GB"};
+
+    string medida_mp = medidas[0];
+    string medida_me = medidas[0];
+    string medida_mt = medidas[0];
+
+    for(int i = 0; memoria_pessoas / 1000 != 0; memoria_pessoas /= 1000) {
+        i++;
+        medida_mp = medidas[i];
+    }
+
+    for(int i = 0; memoria_edges / 1000 != 0; memoria_edges /= 1000) {
+        i++;
+        medida_me = medidas[i];
+    }
+
+    for(int i = 0; memoria_total / 1000 != 0; memoria_total /= 1000) {
+        i++;
+        medida_mt = medidas[i];
+    }
+
+    lista->addItem(QString::fromStdString("Memória usada por pessoas: " +
+                                          to_string(memoria_pessoas) + medida_mp));
+
+    lista->addItem(QString::fromStdString("Memória usada por relacionamentos: " +
+                                          to_string(memoria_edges) + medida_me));
+
+    lista->addItem(QString::fromStdString("Memória usada total: " +
+                                          to_string(memoria_total) + medida_mt));
+
+    tela->addWidget(lista);
+    new_window->setLayout(tela);
+    new_window->setFixedSize(650, 330);
+    new_window->show();
+
+    QEventLoop loop;
+    connect(this, SIGNAL(destroyed()), & loop, SLOT(quit()));
+    loop.exec();
 }
