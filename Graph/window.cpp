@@ -9,6 +9,7 @@
 #include <QValidator>
 #include <QMessageBox>
 #include <ctime>
+#include <iostream>
 
 window::window(QWidget *parent) : QWidget(parent) {
     int button_size = 420;
@@ -552,8 +553,9 @@ void window::grafo_aleatorio() {
         alert->setText("Quantidade de pessoas deve ser maior que 0");
         return;
     }
+
     int n_edges = campo_texto2->text().toInt();
-    unsigned long long limite = n_nodes*n_nodes - n_nodes;
+    unsigned long long limite = (n_nodes*n_nodes - n_nodes)/2;
     if(n_edges > limite) {
         alert->setText("Quantidade de relacionamentos deve estar entre 0 e " + QString::number(limite));
         return;
@@ -601,6 +603,12 @@ void window::grafo_aleatorio() {
                 repetido = false;
                 x = dist_edges(mt);
                 y = dist_edges(mt);
+
+                if(x == y) {
+                    repetido = true;
+                    break;
+                }
+
                 for (const auto& it : edges[x]) {
                     if(it == y) {
                         repetido = true;
@@ -617,7 +625,7 @@ void window::grafo_aleatorio() {
     else {
         int i = 0;
         for(int x = n_nodes; x--; )
-            for(int y = n_nodes; y--; ) {
+            for(int y = x-1; y >= 0; y--) {
                 edges[x].push_back(y);
                 edges[y].push_back(x);
                 i++;
@@ -763,21 +771,99 @@ void window::bfs_connection() {
 }
 
 void window::tela_extra_inf() {
-    // Número de Nós
-    // Número de arestas
-    // Bipartido  --  https://www.geeksforgeeks.org/bipartite-graph/  --
-    // Componentes conectados  --  https://www.geeksforgeeks.org/program-to-count-number-of-connected-components-in-an-undirected-graph/  --
+    new_window = new QWidget(nullptr);
+
+    if(nodes.size() < 1) {
+        QMessageBox::information(new_window, tr("Aviso"), tr("É necessária 1 pessoa no mínimo\npara usar essa opção"));
+        return;
+    }
+
+    int n_edges = 0;
+
+    for(const auto& e : edges) {
+        n_edges += e.size();
+    }
+
+    n_edges /= 2;
+
+    QFont labelFont("Times", 20, QFont::Bold);
+    int maximum_label_height = 30;
+
+    QGridLayout *layout = new QGridLayout();
+
+    QLabel *label_nodes = new QLabel("Número de Nós: ");
+    QLabel *label_edges = new QLabel("Número de arestas: ");
+    QLabel *label_bp = new QLabel("Bipartido: ");
+    QLabel *label_cc = new QLabel("Componentes conectados: ");
+
+    QLabel *numero_nodes = new QLabel(QString::number(nodes.size()));
+    QLabel *numero_edges = new QLabel(QString::number(n_edges));
+    QLabel *is_bp = new QLabel(QString::fromStdString(isBipartite()? "Sim" : "Não"));
+    QLabel *p_amigos = new QLabel(QString::number(quantidade_componentes()));
+
+    label_nodes->setMaximumHeight(maximum_label_height);
+    label_nodes->setFont(labelFont);
+    label_edges->setMaximumHeight(maximum_label_height);
+    label_edges->setFont(labelFont);
+    label_bp->setMaximumHeight(maximum_label_height);
+    label_bp->setFont(labelFont);
+    label_cc->setMaximumHeight(maximum_label_height);
+    label_cc->setFont(labelFont);
+
+    numero_nodes->setMaximumHeight(maximum_label_height);
+    numero_nodes->setFont(labelFont);
+    numero_edges->setMaximumHeight(maximum_label_height);
+    numero_edges->setFont(labelFont);
+    is_bp->setMaximumHeight(maximum_label_height);
+    is_bp->setFont(labelFont);
+    p_amigos->setMaximumHeight(maximum_label_height);
+    p_amigos->setFont(labelFont);
+
+    label_nodes->setAlignment(Qt::AlignRight);
+    label_edges->setAlignment(Qt::AlignRight);
+    label_bp->setAlignment(Qt::AlignRight);
+    label_cc->setAlignment(Qt::AlignRight);
+
+    layout->addWidget(label_nodes, 0, 0);
+    layout->addWidget(label_edges, 1, 0);
+    layout->addWidget(label_bp, 2, 0);
+    layout->addWidget(label_cc, 3, 0);
+
+    numero_nodes->setAlignment(Qt::AlignLeft);
+    numero_edges->setAlignment(Qt::AlignLeft);
+    is_bp->setAlignment(Qt::AlignLeft);
+    p_amigos->setAlignment(Qt::AlignLeft);
+
+    layout->addWidget(numero_nodes, 0, 1);
+    layout->addWidget(numero_edges, 1, 1);
+    layout->addWidget(is_bp, 2, 1);
+    layout->addWidget(p_amigos, 3, 1);
+
+    new_window->setWindowTitle("Informações sobre o grafo");
+    new_window->setLayout(layout);
+    new_window->setFixedSize(500, 200);
+    new_window->show();
+
+    QEventLoop loop;
+    connect(this, SIGNAL(destroyed()), & loop, SLOT(quit()));
+    loop.exec();
 }
 
 void window::tela_estatistica() {
-    QFont font("Times", 15, QFont::Bold);
     new_window = new QWidget(nullptr);
+
+    if(nodes.size() < 1) {
+        QMessageBox::information(new_window, tr("Aviso"), tr("É necessária 1 pessoa no mínimo\npara usar essa opção"));
+        return;
+    }
+
+    QFont font("Times", 15, QFont::Bold);
     QVBoxLayout *tela = new QVBoxLayout();
 
     QListWidget *lista = new QListWidget();
     lista->setFont(font);
 
-    map<string, int> m = BFS_cidades();
+    map<string, int> m = coletar_cidades();
 
     for(auto c : m)
         lista->addItem(QString::fromStdString("Número de moradores de " +
@@ -797,9 +883,9 @@ void window::tela_estatistica() {
     lista->addItem(QString::fromStdString("Número médio de amigos por pessoa: " + to_string(media)));
     lista->addItem("");
 
-    unsigned int memoria_pessoas = sizeof(nodes[0])*nodes.size();
-    unsigned int memoria_edges = sizeof(edges[0][0])*quant_edges;
-    unsigned int memoria_total = memoria_pessoas + memoria_edges;
+    double memoria_pessoas = sizeof(nodes[0])*nodes.size();
+    double memoria_edges = sizeof(edges[0][0])*quant_edges;
+    double memoria_total = memoria_pessoas + memoria_edges;
 
     vector<string> medidas = {"Bytes", "KB", "MB", "GB"};
 
@@ -807,31 +893,35 @@ void window::tela_estatistica() {
     string medida_me = medidas[0];
     string medida_mt = medidas[0];
 
-    for(int i = 0; memoria_pessoas / 1000 != 0; memoria_pessoas /= 1000) {
+    for(int i = 0; memoria_pessoas / 1000 > 1; memoria_pessoas /= 1000) {
         i++;
         medida_mp = medidas[i];
     }
 
-    for(int i = 0; memoria_edges / 1000 != 0; memoria_edges /= 1000) {
+    for(int i = 0; memoria_edges / 1000 > 1; memoria_edges /= 1000) {
         i++;
         medida_me = medidas[i];
     }
 
-    for(int i = 0; memoria_total / 1000 != 0; memoria_total /= 1000) {
+    for(int i = 0; memoria_total / 1000 > 1; memoria_total /= 1000) {
         i++;
         medida_mt = medidas[i];
     }
 
     lista->addItem(QString::fromStdString("Memória usada por pessoas: " +
-                                          to_string(memoria_pessoas) + medida_mp));
+                                          to_string((int)memoria_pessoas) +
+                                          "," + to_string((int)(memoria_pessoas*100)%100) + medida_mp));
 
     lista->addItem(QString::fromStdString("Memória usada por relacionamentos: " +
-                                          to_string(memoria_edges) + medida_me));
+                                          to_string((int)memoria_edges) +
+                                          "," + to_string((int)(memoria_edges*100)%100) + medida_me));
 
     lista->addItem(QString::fromStdString("Memória usada total: " +
-                                          to_string(memoria_total) + medida_mt));
+                                          to_string((int)memoria_total) +
+                                          "," + to_string((int)(memoria_total*100)%100) + medida_mt));
 
     tela->addWidget(lista);
+    new_window->setWindowTitle("Estatísticas");
     new_window->setLayout(tela);
     new_window->setFixedSize(650, 330);
     new_window->show();

@@ -5,8 +5,6 @@
 vector<Pessoa> nodes;
 vector<vector<unsigned int>> edges;
 
-const int MAX = 10000000;
-
 bool BFS(const unsigned int src, const unsigned int dest, vector<int> &pred, vector<int> &dist) {
     unsigned long v = nodes.size();
     queue<unsigned int> queue;
@@ -114,37 +112,64 @@ vector<int> complete_BFS_Shortest_Distance(const unsigned int s) {
     return quantidade;
 }
 
-map<string, int> BFS_cidades() {
+map<string, int> coletar_cidades() {
     map<string, int> m;
-    int src = 0;
-    unsigned long v = nodes.size();
-    vector<int> dist(v);
-    queue<unsigned int> queue;
-    bitset<MAX> visited;
-
-    for (unsigned long i = v; i--; ) {
-        visited[i] = false;
-        dist[i] = 999999999;
-    }
-
-    visited[src] = true;
-    dist[src] = 0;
-    queue.push(src);
-
-    while (!queue.empty()) {
-        unsigned int u = queue.front();
-        queue.pop();
-        for (unsigned long i = edges[u].size(); i--; ) {
-            unsigned int valor = edges[u][i];
-            if(visited[valor] == false) {
-                visited[valor] = true;
-                dist[valor] = dist[u] + 1;
-                queue.push(valor);
-                string s(nodes[valor].get_cidade());
-                m[s]++;
-            }
-        }
+    for(auto& n : nodes) {
+        m[n.get_cidade()]++;
     }
 
     return m;
+}
+
+bool colorGraph(vector<int>& color,int pos, int c){
+    if(color[pos] != -1 && color[pos] !=c)
+        return false;
+
+    color[pos] = c;
+    bool ans = true;
+    for(const auto& e : edges[pos]) {
+        if(color[e] == -1)
+            ans &= colorGraph(color,e,1-c);
+
+        if(color[e] !=-1 && color[e] != 1-c)
+            return false;
+
+        if (!ans)
+            return false;
+    }
+
+    return true;
+}
+
+bool isBipartite(){
+    size_t V = nodes.size();
+    vector<int> color(V, -1);
+
+    int pos = 0;
+    return colorGraph(color,pos,1);
+}
+
+int quantidade_componentes() {
+    const int V = nodes.size();
+    bitset<MAX> visited;
+    int count = 0;
+    for (int v = V; v--; )
+        visited[v] = false;
+
+    for (int v = 0; v < V; v++) {
+        if (visited[v] == false) {
+            DFSUtil(v, visited);
+            count += 1;
+        }
+    }
+
+    return count;
+}
+
+void DFSUtil(int v, bitset<MAX>& visited) {
+    visited[v] = true;
+
+    for(const auto& i : edges[v])
+        if (!visited[i])
+            DFSUtil(i, visited);
 }
