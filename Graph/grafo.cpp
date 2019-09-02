@@ -131,7 +131,7 @@ bool colorGraph(vector<int>& color,int pos, int c){
         if(color[e] == -1)
             ans &= colorGraph(color,e,1-c);
 
-        if(color[e] !=-1 && color[e] != 1-c)
+        if(color[e] != -1 && color[e] != 1-c)
             return false;
 
         if (!ans)
@@ -142,7 +142,7 @@ bool colorGraph(vector<int>& color,int pos, int c){
 }
 
 bool isBipartite(){
-    size_t V = nodes.size();
+    const size_t V = nodes.size();
     vector<int> color(V, -1);
 
     int pos = 0;
@@ -150,16 +150,14 @@ bool isBipartite(){
 }
 
 int quantidade_componentes() {
-    const int V = nodes.size();
+    const size_t V = nodes.size();
     bitset<MAX> visited;
     int count = 0;
-    for (int v = V; v--; )
-        visited[v] = false;
 
-    for (int v = 0; v < V; v++) {
-        if (visited[v] == false) {
+    for (size_t v = 0; v < V; ++v) {
+        if (!visited[v]) {
             DFSUtil(v, visited);
-            count += 1;
+            count++;
         }
     }
 

@@ -53,3 +53,5 @@ O software armazena as pessoas em um grafo, sendo esse grafo uma lista de adjac�
   - Adicionar Relacionamento (o usuário informará os IDs das pessoas e o programa irá cadastrar um relaciomento entre elas)
   - Menor caminho entre duas Pessoas (o usuário informará os IDs das pessoas e o programa irá calcular a menor quantidade de pessoas entre essas duas)
   - Conexão entre uma Pessoa e as outras (o usuário insere o ID da pessoa e o programa irá calcular a menor distância entre essa pessoa e todas as outras)
+  - Informações sobre o grafo (o programa mostrará informações como o número de nós, número de arestas, quantidade de componentes conectados e se o grafo é bipartido ou não)
+  - Estatísticas (o programa mostrará informações como quantidade de moradores por cidade, número médio de amigos por pessoa e a quantidade de memória usada para guardar as informações)

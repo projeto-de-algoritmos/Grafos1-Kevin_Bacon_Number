@@ -582,9 +582,9 @@ void window::grafo_aleatorio() {
 
     alert->setText("Adicionando Pessoas");
 
-    for(int i = 0; i < n_nodes; ++i) {
-        nodes.emplace_back(i, (string(nomes[dist_nomes(mt)]) + " " + string(sobrenomes[dist_sobrenomes(mt)])).c_str(), cidades[dist_cidades(mt)]);
-        if(!(i%um_perc)) progressBar->setValue(i);
+    for(int i = n_nodes; i--; ) {
+        nodes.emplace_back(n_nodes-i-1, (string(nomes[dist_nomes(mt)]) + " " + string(sobrenomes[dist_sobrenomes(mt)])).c_str(), cidades[dist_cidades(mt)]);
+        if(!((n_nodes-i)%um_perc)) progressBar->setValue(n_nodes-i);
     }
 
     progressBar->setValue(0);
@@ -596,7 +596,7 @@ void window::grafo_aleatorio() {
     alert->setText("Adicionando Relacionamentos");
 
     if(n_edges != limite) {
-        for(int i = 0; i < n_edges; ++i) {
+        for(int i = n_edges; i--; ) {
             unsigned int x, y;
             bool repetido;
             do {
@@ -619,7 +619,7 @@ void window::grafo_aleatorio() {
 
             edges[x].push_back(y);
             edges[y].push_back(x);
-            if(!(i%um_perc)) progressBar->setValue(i);
+            if(!((n_edges-i)%um_perc)) progressBar->setValue(n_edges-i);
         }
     }
     else {
@@ -908,11 +908,11 @@ void window::tela_estatistica() {
         medida_mt = medidas[i];
     }
 
-    lista->addItem(QString::fromStdString("Memória usada por pessoas: " +
+    lista->addItem(QString::fromStdString("Memória usada por todas as pessoas: " +
                                           to_string((int)memoria_pessoas) +
                                           "," + to_string((int)(memoria_pessoas*100)%100) + medida_mp));
 
-    lista->addItem(QString::fromStdString("Memória usada por relacionamentos: " +
+    lista->addItem(QString::fromStdString("Memória usada por todos os relacionamentos: " +
                                           to_string((int)memoria_edges) +
                                           "," + to_string((int)(memoria_edges*100)%100) + medida_me));
 
