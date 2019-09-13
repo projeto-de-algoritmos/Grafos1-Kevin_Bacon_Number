@@ -1,42 +1,60 @@
-# LISTA 1 - PROJETO DE ALGORITMOS - 2019/2
+# Kevin Bacon Number
 
-### Henrique Martins de Messias - 17/0050394
+**Número da Lista**: 1<br>
+**Conteúdo da Disciplina**: Grafos<br>
 
-<br>
+## Alunos
+|Matrícula | Aluno |
+| -- | -- |
+| 17/0050394  |  Henrique Martins de Messias |
 
-### Instalações necessárias
-- No teminal, digite os seguinte comando para instalar as dependências:
-  ```bash
+## Sobre 
+O software deste repositório é uma simulação do <b>Kevin Bacon Number</b>.
+
+## Screenshots
+![inicio](img/inicio.png)
+
+![menor-caminho](img/menor-caminho.png)
+
+![c1p](img/c1p.png)
+
+![inf-grafo](img/inf-grafo.png)
+
+![estatisticas](img/estatisticas.png)
+
+## Instalação 
+**Linguagem**: C++<br>
+Seu dispositivo deve ter o Qt5 instalado. Para fazer isso, utilize os seguintes comandos:
+
+```bash
     $ sudo apt-get install build-essential
     $ sudo apt-get install qt5-default
-  ```
+```
 
+## Uso
 
-### Instruções de uso
+No terminal, vá até o diretório do exercício, que contém, além de arquivos como o README, a pasta "Graph".
 
-- No terminal, vá até o diretório do exercício, que contém, além de arquivos como o README, a pasta "Graph"
-- Digite o seguinte comando:
+Digite o seguinte comando:
 
   ```bash
     $ cd Graph
     $ qmake
   ```
 
-  - Para compilar o código, digite:
+Para compilar o código, digite:
 
   ```bash
     $ make
   ```
 
-- Para executar o código, digite:
+Para executar o código, digite:
 
   ```bash
     $ ./Graph
   ```
 
-### Detalhes da Lista 1
-
-O software deste repositório é uma simulação do <b>Kevin Bacon Number</b>.
+## Outros
 
 Cada pessoa possui os seguintes dados:
  - ID (cada pessoa possui um, sem repetição)
